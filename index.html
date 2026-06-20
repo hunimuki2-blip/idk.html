@@ -67,16 +67,29 @@
             const timerEl = document.getElementById('timer');
             let endTime = null;
 
-            // Pure window.name persistence (safest in sandboxed iframes)
+            // Try localStorage first (works on direct GitHub Pages link)
             try {
-                if (window.name && !isNaN(parseInt(window.name))) {
+                if (typeof localStorage !== 'undefined') {
+                    const saved = localStorage.getItem('brainrotCooldownEnd');
+                    if (saved) endTime = parseInt(saved);
+                }
+            } catch(e) {}
+
+            // Fallback to window.name (for sandboxed iframes / refreshes)
+            try {
+                if (!endTime && window.name && !isNaN(parseInt(window.name))) {
                     endTime = parseInt(window.name);
                 }
             } catch(e) {}
 
-            // Start new 20-day timer if none exists
+            // If no saved timer → start new 20-day cooldown
             if (!endTime || isNaN(endTime)) {
                 endTime = Date.now() + (20 * 24 * 60 * 60 * 1000);
+                try {
+                    if (typeof localStorage !== 'undefined') {
+                        localStorage.setItem('brainrotCooldownEnd', endTime);
+                    }
+                } catch(e) {}
                 try {
                     window.name = endTime.toString();
                 } catch(e) {}
@@ -86,6 +99,7 @@
                 const remaining = endTime - Date.now();
                 if (remaining <= 0) {
                     timerEl.innerHTML = "✅ COOLDOWN EXPIRED";
+                    try { if (typeof localStorage !== 'undefined') localStorage.removeItem('brainrotCooldownEnd'); } catch(e) {}
                     try { window.name = ""; } catch(e) {}
                 } else {
                     const d = Math.floor(remaining / 86400000);
@@ -95,6 +109,7 @@
                     timerEl.textContent = `${d}d ${h}h ${m}m ${s}s remaining`;
                 }
             }
+
             update();
             setInterval(update, 1000);
         }
